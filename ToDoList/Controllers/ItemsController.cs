@@ -19,8 +19,8 @@ namespace ToDoList.Controllers
         public ActionResult Index()
         {
             List<Item> model = _db.Items
-                                  .Include(item => item.Category)
-                                  .ToList();
+                                .Include(item => item.Category)
+                                .ToList();
             return View(model);
         }
 
@@ -33,22 +33,26 @@ namespace ToDoList.Controllers
         [HttpPost]
         public ActionResult Create(Item item)
         {
-            if (item.CategoryId == 0)
+            if (!ModelState.IsValid)
             {
-                return RedirectToAction("Create");
+                ViewBag.CategoryId = new SelectList(_db.Categories, "CategoryId", "Name");
+                return View(item);
             }
-            _db.Items.Add(item);
-            _db.SaveChanges();
-            return RedirectToAction("Index");
+            else
+            {
+                _db.Items.Add(item);
+                _db.SaveChanges();
+                return RedirectToAction("Index");
+            }
         }
 
         public ActionResult Details(int id)
         {
             Item thisItem = _db.Items
-               .Include(item => item.Category)
-               .Include(item => item.JoinEntities)
-               .ThenInclude(join => join.Tag)
-               .FirstOrDefault(item => item.ItemId == id);
+            .Include(item => item.Category)
+            .Include(item => item.JoinEntities)
+            .ThenInclude(join => join.Tag)
+            .FirstOrDefault(item => item.ItemId == id);
             return View(thisItem);
         }
 
